@@ -19,7 +19,8 @@
 #[macro_use]
 pub extern crate alloc;
 
-use alloc::{boxed::Box, rc::Rc, vec::Vec};
+use alloc::sync::Arc;
+use alloc::{boxed::Box, vec::Vec};
 use core::cmp::Ord;
 use core::fmt::Debug;
 use core::ops::Bound;
@@ -426,7 +427,7 @@ impl<T: Ord, V> IntervalTree<T, V> {
         node: Option<Box<Node<T, V>>>,
         interval: Interval<T>,
         value: V,
-        max: Rc<Bound<T>>,
+        max: Arc<Bound<T>>,
     ) -> Box<Node<T, V>> {
         if node.is_none() {
             return Box::new(Node::init(interval, value, max, 0, 1));

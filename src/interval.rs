@@ -2,6 +2,7 @@ use alloc::{
     rc::Rc,
     string::{String, ToString},
 };
+use alloc::sync::Arc;
 use core::{
     cmp::{Eq, Ord, Ordering, PartialEq, PartialOrd},
     ops::Bound::{self, Excluded, Included, Unbounded},
@@ -44,8 +45,8 @@ use num::Num;
 /// ```
 #[derive(Clone, Debug, Hash)]
 pub struct Interval<T: Ord> {
-    low: Rc<Bound<T>>,
-    high: Rc<Bound<T>>,
+    low: Arc<Bound<T>>,
+    high: Arc<Bound<T>>,
 }
 
 impl<T: Ord> Interval<T> {
@@ -75,8 +76,8 @@ impl<T: Ord> Interval<T> {
     /// ```
     pub fn new(low: Bound<T>, high: Bound<T>) -> Interval<T> {
         let interval = Interval {
-            low: Rc::new(low),
-            high: Rc::new(high),
+            low: Arc::new(low),
+            high: Arc::new(high),
         };
 
         assert!(Interval::valid(&interval), "Interval is not valid");
@@ -97,8 +98,8 @@ impl<T: Ord> Interval<T> {
     /// let point1 = Interval::point(2);
     /// ```
     pub fn point(value: T) -> Interval<T> {
-        let low = Rc::new(Included(value));
-        let high = Rc::clone(&low);
+        let low = Arc::new(Included(value));
+        let high = Arc::clone(&low);
 
         let interval = Interval { low, high };
 
@@ -147,8 +148,8 @@ impl<T: Ord> Interval<T> {
 
     /// Get a duplicate of lower bound of the interval
     #[must_use]
-    pub fn get_low(&self) -> Rc<Bound<T>> {
-        Rc::clone(&self.low)
+    pub fn get_low(&self) -> Arc<Bound<T>> {
+        Arc::clone(&self.low)
     }
 
     /// Get reference to higher bound of the interval
@@ -159,8 +160,8 @@ impl<T: Ord> Interval<T> {
 
     /// Get a duplicate of higher bound of the interval
     #[must_use]
-    pub fn get_high(&self) -> Rc<Bound<T>> {
-        Rc::clone(&self.high)
+    pub fn get_high(&self) -> Arc<Bound<T>> {
+        Arc::clone(&self.high)
     }
 
     /// Returns true if `first` and `second` intervals overlap, false otherwise
@@ -248,44 +249,44 @@ impl<T: Ord> Interval<T> {
             (Included(low1) | Excluded(low1), Included(low2))
             | (Excluded(low1), Excluded(low2)) => {
                 if low1 >= low2 {
-                    Rc::clone(&first.low)
+                    Arc::clone(&first.low)
                 } else {
-                    Rc::clone(&second.low)
+                    Arc::clone(&second.low)
                 }
             }
             (Included(low1), Excluded(low2)) => {
                 if low1 > low2 {
-                    Rc::clone(&first.low)
+                    Arc::clone(&first.low)
                 } else {
-                    Rc::clone(&second.low)
+                    Arc::clone(&second.low)
                 }
             }
-            (Unbounded, Included(_) | Excluded(_)) => Rc::clone(&second.low),
-            (Included(_) | Excluded(_), Unbounded) => Rc::clone(&first.low),
+            (Unbounded, Included(_) | Excluded(_)) => Arc::clone(&second.low),
+            (Included(_) | Excluded(_), Unbounded) => Arc::clone(&first.low),
 
-            (Unbounded, Unbounded) => Rc::new(Unbounded),
+            (Unbounded, Unbounded) => Arc::new(Unbounded),
         };
 
         let high = match (&first.high(), &second.high()) {
             (Included(high1) | Excluded(high1), Included(high2))
             | (Excluded(high1), Excluded(high2)) => {
                 if high1 <= high2 {
-                    Rc::clone(&first.high)
+                    Arc::clone(&first.high)
                 } else {
-                    Rc::clone(&second.high)
+                    Arc::clone(&second.high)
                 }
             }
             (Included(high1), Excluded(high2)) => {
                 if high1 < high2 {
-                    Rc::clone(&first.high)
+                    Arc::clone(&first.high)
                 } else {
-                    Rc::clone(&second.high)
+                    Arc::clone(&second.high)
                 }
             }
-            (Unbounded, Included(_) | Excluded(_)) => Rc::clone(&second.high),
-            (Included(_) | Excluded(_), Unbounded) => Rc::clone(&first.high),
+            (Unbounded, Included(_) | Excluded(_)) => Arc::clone(&second.high),
+            (Included(_) | Excluded(_), Unbounded) => Arc::clone(&first.high),
 
-            (Unbounded, Unbounded) => Rc::new(Unbounded),
+            (Unbounded, Unbounded) => Arc::new(Unbounded),
         };
 
         Some(Interval { low, high })
