@@ -87,6 +87,8 @@ pub struct IntervalTree<T: Ord, V> {
     root: Option<Box<Node<T, V>>>,
 }
 
+unsafe impl<T: Ord, V> Send for IntervalTree<T, V> where V: Send, T: Send {}
+
 impl<T: Ord, V> IntervalTree<T, V> {
     /// Initialize an interval tree with end points of type usize
     ///
